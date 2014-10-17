@@ -1,0 +1,49 @@
+body {
+    background-image: url("../img/wood_texture.jpg");
+    min-height: 800px;
+    min-width: 600px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    min-height: 512px;
+}
+
+
+.note_pad_container, .input_container {
+    margin-top: 25px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 512px;
+}
+
+.note_pad, .input {
+    background-image: url("../img/paper_texture.jpg");
+}
+
+.note {
+    margin-bottom: 5px;
+}
+
+.note > button {
+    float: right;
+}
+
+.input_container {
+    width: 512px;
+    min-height: 64px;
+}
+
+.input_container > button {
+
+}
+
+.input {
+    width: 100%;
+    height: 100%;
+    min-height: 64px;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
