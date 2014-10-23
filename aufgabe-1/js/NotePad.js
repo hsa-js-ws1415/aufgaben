@@ -53,8 +53,7 @@
    * @param {Note, Note, Note, ...} note
    */
   NotePad.prototype.add = function (note) {
-      Array.prototype.push.apply(this.notes, Array.prototype.slice.call(arguments));
-      this.render();
+      //@TODO
   };
 
   /**
@@ -62,14 +61,7 @@
    * @returns {Note}
    */
   NotePad.prototype.remove = function (note) {
-    for (var i = 0; this.notes.length; i++) {
-      if (note === this.notes[i]) {
-        this.notes.splice(i, 1);
-        break;
-      }
-    }
-
-    this.render();
+    //@TODO
   };
 
   NotePad.prototype.render = function () {
