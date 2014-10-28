@@ -5,6 +5,8 @@
    * @constructor
    */
   function NotePad() {
+
+    // Calling explicitly "Super"-constructor
     EventEmitter2.call(this);
 
     this._init();
@@ -13,6 +15,8 @@
   }
 
   /**
+   * Inherit form EventEmitter2
+   *
    * @type {EventEmitter2}
    */
   NotePad.prototype = Object.create(EventEmitter2.prototype);
