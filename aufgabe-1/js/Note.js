@@ -24,8 +24,6 @@
       this._container = doc.createElement('li');
       this._container.className = 'note';
 
-      this._textContainer = doc.createElement('p');
-
       this._button = doc.createElement('button');
       this._button.appendChild(doc.createTextNode(' X '));
       this._button.addEventListener('click', this._clickHandler.bind(this), false);
@@ -38,13 +36,7 @@
    * @type {Node}
    * @protected
    */
-  Node.prototype._container = null;
-
-  /**
-   * @type {Node}
-   * @protected
-   */
-  Node.prototype._textContainer = null;
+  Note.prototype._container = null;
 
   /**
    * @type {Node}
@@ -57,13 +49,14 @@
    */
   Note.prototype._clickHandler = function () {
     this.emit('delete', this);
-    this.onDelete();
+    this.onDelete(this);
   };
 
   /**
+   * @param {Note} self
    * @TODO
    */
-  Note.prototype.onDelete = function () {};
+  Note.prototype.onDelete = function (self) {};
 
   /**
    * @type {Note}
