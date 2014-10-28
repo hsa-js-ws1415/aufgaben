@@ -4,12 +4,16 @@
    * @constructor
    */
   function Input() {
+
+    // Calling explicitly "Super"-constructor
     EventEmitter2.call(this);
 
     this._init();
   }
 
   /**
+   * Inherit form EventEmitter2
+   *
    * @type {EventEmitter2}
    */
   Input.prototype = Object.create(EventEmitter2.prototype);
@@ -27,6 +31,8 @@
 
       this._button = doc.createElement('button');
       this._button.appendChild(doc.createTextNode('Save'));
+
+      // This abstracts the DOM-"click"-Event.
       this._button.addEventListener('click', this._clickHandler.bind(this), false);
       this._button.className = 'input_button';
 
