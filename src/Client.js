@@ -2,8 +2,6 @@
     'use strict';
 
     var server;
-    var client = 0;
-    var connections = {};
 
     /**
      *
@@ -64,41 +62,88 @@
     };
 
     /**
-     * @param {?number, function(Error|null, ?Note|[Note])} id (optional)
-     * @param {?function(Error|null, ?Note|[Note])} callback
+     * @param {number, function(Error|null, Note?|[Note]?)} id (optional)
+     * @param {function(Error|null, Note?|[Note]?)?} callback
      */
     Server.prototype.read = function (id, callback) {
-        var isId = typeof id !== 'function';
-        var notes = JSON.parse(localStorage.getItem('notes'));
-        var noteId;
-        var note;
-        var result;
+        setTimeout(function () {
+            var isId = typeof id !== 'function';
+            var notes = JSON.parse(localStorage.getItem('notes'));
+            var noteId;
+            var note;
+            var result;
 
-        callback = isId ? callback : id;
+            callback = isId ? callback : id;
 
-        if (isId) {
+            if (isId) {
+                if (!notes[id]) {
+                    callback(new Error('(Storage Error) Can\t find note for id ' + id + ' .' ));
+                    return;
+                }
+
+                note = new Note(notes[id]);
+                note.id = id;
+
+                callback(null, note);
+            }
+
+            if (!isId) {
+                result = [];
+                for (noteId in notes) {
+                    if (notes.hasOwnProperty(noteId)) {
+                        note = new Note(notes[noteId]);
+                        note.id = noteId;
+                        result.push(note);
+                    }
+                }
+                callback(null, result);
+            }
+        }, 30);
+    };
+
+    /**
+     *
+     * @param {number} id
+     * @param {Note} note
+     * @param {function(Error|null, Note?)} callback
+     */
+    Server.prototype.update = function (id, note, callback) {
+        setTimeout(function () {
+            var notes = JSON.parse(localStorage.getItem('notes'));
+
             if (!notes[id]) {
-                callback(new Error('(Storage Error) Can\t find note for id ' + id + ' .' ));
+                callback(new Error('(Storage Error) Can\t find note for id ' + id + ' .'));
                 return;
             }
 
-            note = new Note(notes[id]);
-            note.id = id;
+            notes[id] = note.text;
 
-            callback(null, note);
-        }
+            localStorage.setItem('notes', JSON.stringify(notes));
 
-        if (!isId) {
-            result = [];
-            for (noteId in notes) {
-                if (notes.hasOwnProperty(noteId)) {
-                    note = new Note(notes[noteId]);
-                    note.id = noteId;
-                    result.push(note);
-                }
+            callback(null, notes);
+        }, 75);
+    }
+
+    /**
+     *
+     * @param {number} id
+     * @param {function(Error|null)} callback
+     */
+    Server.prototype.delete = function (id, callback) {
+        setTimeout(function () {
+            var notes = localStorage.getItem('notes');
+
+            if (!notes[id]) {
+                callback(new Error('(Storage Error) Can\t find note for id ' + id + ' .'));
+                return;
             }
-            callback(null, result);
-        }
+
+            delete notes[id];
+
+            localStorage.setItem('notes', JSON.stringify(notes));
+
+            callback(null);
+        }, 10);
     };
 
     server = new Server();
@@ -110,30 +155,14 @@
      * @constructor
      */
     function Client() {
-        this.__id = ++client;
         EventEmitter2.call(this);
     }
-
-    /**
-     * @type {string}
-     * @private
-     */
-    Client.prototype.__id = null;
 
     /**
      *
      * @type {EventEmitter2}
      */
     Client.prototype = Object.create(EventEmitter2.prototype);
-
-    /**
-     * @private
-     */
-    Client.prototype.__checkConnection = function () {
-        if (!connections[this.__id]) {
-            throw new Error('(Fatal Error) Connection was not established.');
-        }
-    };
 
     /**
      *
@@ -150,10 +179,6 @@
         }
 
         setTimeout(function () {
-            if (!err) {
-                connections[self.__id] = true;
-            }
-
             if (callback) {
                 callback(err);
             }
@@ -175,9 +200,6 @@
      */
     Client.prototype.create = function (note, callback) {
         var response = Q.defer();
-        var self = this;
-
-        this.__checkConnection();
 
         server.create(note, function (err, note) {
             if (err) {
@@ -188,7 +210,6 @@
                 return;
             }
 
-            self.emit('created', note);
             response.resolve(note);
 
             if (callback) {
@@ -201,56 +222,99 @@
 
     /**
      *
-     * @param {?number|function(Error|null, ?Note|[Note])} id (optional)
-     * @param {function(Error|null, ?Note|[Note])} callback
+     * @param {number|function(Error|null, Note?|[Note]?)} id (optional)
+     * @param {function(Error|null, Note?|[Note]?)} callback
      * @returns {promise}
      */
     Client.prototype.read = function (id, callback) {
         var response = Q.defer();
 
-        this.__checkConnection();
+        /**
+         * @param {Error|null, ?Note|?[Note]} err
+         * @param {Note|[Note]?} result
+         */
+        function handleResponse(err, result) {
+            if (err) {
+                response.reject(err);
+                if (callback) {
+                    callback(err);
+                }
+                return;
+            }
+
+            response.resolve(result);
+        }
 
         if (typeof id === 'function') {
-            server.read(function (err, notes) {
-                if (err) {
-                    response.reject(err);
-                    if (callback) {
-                        callback(null);
-                    }
-                    return;
-                }
-
-                response.resolve(notes);
-            });
+            server.read(handleResponse);
         } else {
-            server.read(id, function (err, note) {
-                if (err) {
-                    response.reject(err);
-                    if (callback) {
-                        callback(null);
-                    }
-                    return;
-                }
-
-                response.resolve(note);
-            });
+            server.read(id, handleResponse);
         }
 
         return response.promise;
     };
 
-    Client.prototype.update = function () {
+    /**
+     *
+     * @param {number} id
+     * @param {Note} note
+     * @param {function(Error|null, Note?)} callback
+     * @returns {promise}
+     */
+    Client.prototype.update = function (id, note, callback) {
         var response = Q.defer();
+
+        server.update(id, note, function (err, note) {
+            if (err) {
+                response.reject(err);
+                if (callback) {
+                    callback(err);
+                }
+                return;
+            }
+
+            response.resolve(note);
+            if (callback) {
+                callback(null, note);
+            }
+        });
 
         return response.promise;
     };
 
-    Client.prototype.delete = function () {
+    /**
+     *
+     * @param {number} id
+     * @param {function (Error|null, id?)} callback
+     * @returns {promise}
+     */
+    Client.prototype.delete = function (id, callback) {
         var response = Q.defer();
+
+        server.delete(id, function (err) {
+           if (err) {
+               response.reject(err);
+               if (err) {
+                   callback(err);
+               }
+               return;
+           }
+
+            response.resolve(id);
+            if (callback) {
+                callback(null, id)
+            }
+        });
 
         return response.promise;
     };
 
+
+
+    /**
+     *
+     * @type {Client}
+     */
     win.Client = Client;
 
 })(window);
