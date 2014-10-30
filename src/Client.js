@@ -131,7 +131,7 @@
      */
     Server.prototype.destroy = function (id, callback) {
         setTimeout(function () {
-            var notes = localStorage.getItem('notes');
+            var notes = JSON.parse(localStorage.getItem('notes'));
 
             if (!notes[id]) {
                 callback(new Error('(Storage Error) Can\t find note for id ' + id + ' .'));
@@ -256,10 +256,12 @@
             }
         }
 
-        if (typeof id === 'function') {
-            server.read(handleResponse);
-        } else {
+        if (id) {
             server.read(id, handleResponse);
+        }
+
+        if (!id) {
+            server.read(handleResponse);
         }
 
         this.emit('read:read', id);
