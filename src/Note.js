@@ -81,7 +81,7 @@
     Note.prototype.setText = function (text) {
         this._container.removeChild(this._text);
         this._text = doc.createTextNode(text);
-        this._container.prependChild(text);
+        this._container.appendChild(this._text);
         this.text = text;
 
         return this;
