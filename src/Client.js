@@ -104,10 +104,10 @@
     /**
      *
      * @param {number} id
-     * @param {Note} note
+     * @param {string} text
      * @param {function(Error|null, Note?)} callback
      */
-    Server.prototype.update = function (id, note, callback) {
+    Server.prototype.update = function (id, text, callback) {
         setTimeout(function () {
             var notes = JSON.parse(localStorage.getItem('notes'));
 
@@ -116,7 +116,7 @@
                 return;
             }
 
-            notes[id] = note.text;
+            notes[id] = text;
 
             localStorage.setItem('notes', JSON.stringify(notes));
 
@@ -126,10 +126,10 @@
 
     /**
      *
-     * @param {number} id
+     * @param {number} note
      * @param {function(Error|null)} callback
      */
-    Server.prototype.delete = function (id, callback) {
+    Server.prototype.destroy = function (id, callback) {
         setTimeout(function () {
             var notes = localStorage.getItem('notes');
 
@@ -170,15 +170,15 @@
      * @param {?function(Error|null)} callback (optional)
      */
     Client.prototype.connect = function (serverURI, callback) {
-        var err = null;
-        var serverDelay = 50; //ms
         var self = this;
 
-        if (serverURI !== server.uri) {
-            err = new Error('(Connection Error) Unable to resolve uri: ' + serverURI + '.');
-        }
-
         setTimeout(function () {
+            var err = null;
+
+            if (serverURI !== server.uri) {
+                err = new Error('(Connection Error) Unable to resolve uri: ' + serverURI + '.');
+            }
+
             if (callback) {
                 callback(err);
             }
@@ -189,7 +189,7 @@
             }
 
             self.emit('connected', self);
-        }, serverDelay);
+        }, 50);
     };
 
     /**
@@ -200,16 +200,21 @@
      */
     Client.prototype.create = function (note, callback) {
         var response = Q.defer();
+        var self = this;
 
+        this.emit('create:create', note);
         server.create(note, function (err, note) {
             if (err) {
+                self.emit('create:error', err);
                 response.reject(err);
                 if (callback) {
                     callback(err);
                 }
+
                 return;
             }
 
+            self.emit('create:success', note);
             response.resolve(note);
 
             if (callback) {
@@ -228,6 +233,7 @@
      */
     Client.prototype.read = function (id, callback) {
         var response = Q.defer();
+        var self = this;
 
         /**
          * @param {Error|null, ?Note|?[Note]} err
@@ -235,6 +241,7 @@
          */
         function handleResponse(err, result) {
             if (err) {
+                self.emit('read:error', err);
                 response.reject(err);
                 if (callback) {
                     callback(err);
@@ -242,7 +249,11 @@
                 return;
             }
 
+            self.emit('read:success', result);
             response.resolve(result);
+            if (callback) {
+                callback(null, result);
+            }
         }
 
         if (typeof id === 'function') {
@@ -251,21 +262,24 @@
             server.read(id, handleResponse);
         }
 
+        this.emit('read:read', id);
+
         return response.promise;
     };
 
     /**
      *
-     * @param {number} id
      * @param {Note} note
      * @param {function(Error|null, Note?)} callback
      * @returns {promise}
      */
-    Client.prototype.update = function (id, note, callback) {
+    Client.prototype.update = function (note, callback) {
         var response = Q.defer();
+        var self = this;
 
-        server.update(id, note, function (err, note) {
+        server.update(note.id, note.text, function (err, note) {
             if (err) {
+                self.emit('update:error', err);
                 response.reject(err);
                 if (callback) {
                     callback(err);
@@ -273,26 +287,31 @@
                 return;
             }
 
+            self.emit('update:success', note);
             response.resolve(note);
             if (callback) {
                 callback(null, note);
             }
         });
 
+        this.emit('update:update', note);
+
         return response.promise;
     };
 
     /**
      *
-     * @param {number} id
+     * @param {Note} note
      * @param {function (Error|null, id?)} callback
      * @returns {promise}
      */
-    Client.prototype.delete = function (id, callback) {
+    Client.prototype.destroy = function (note, callback) {
         var response = Q.defer();
+        var self = this;
 
-        server.delete(id, function (err) {
+        server.destroy(note.id, function (err) {
            if (err) {
+               self.emit('destroy:error', err);
                response.reject(err);
                if (err) {
                    callback(err);
@@ -300,11 +319,15 @@
                return;
            }
 
-            response.resolve(id);
+            delete note.id;
+            self.emit('destroy:success', note);
+            response.resolve(note);
             if (callback) {
-                callback(null, id)
+                callback(null, note);
             }
         });
+
+        this.emit('destroy:destroy', note);
 
         return response.promise;
     };
