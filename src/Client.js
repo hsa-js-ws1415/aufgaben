@@ -167,7 +167,7 @@
     /**
      *
      * @param {string} serverURI
-     * @param {?function(Error|null)} callback (optional)
+     * @param {function(Error|null)?} callback (optional)
      */
     Client.prototype.connect = function (serverURI, callback) {
         var self = this;
@@ -241,7 +241,7 @@
          */
         function handleResponse(err, result) {
             if (err) {
-                self.emit('read:error', err);
+                self.emit('read:error', err, id);
                 response.reject(err);
                 if (callback) {
                     callback(err);
@@ -308,10 +308,11 @@
     Client.prototype.destroy = function (note, callback) {
         var response = Q.defer();
         var self = this;
+        var id = note.id;
 
         server.destroy(note.id, function (err) {
            if (err) {
-               self.emit('destroy:error', err);
+               self.emit('destroy:error', err, id);
                response.reject(err);
                if (err) {
                    callback(err);
@@ -320,7 +321,7 @@
            }
 
             delete note.id;
-            self.emit('destroy:success', note);
+            self.emit('destroy:success', id);
             response.resolve(note);
             if (callback) {
                 callback(null, note);
