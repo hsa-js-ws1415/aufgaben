@@ -18,6 +18,11 @@ Es steht das folgende Gründgerüst zur Verfügung:
   - **R**ead(): liest ein oder mehrere `Notes` vom Server
   - **U**pdate(): aktualisiert ein `Note` auf dem Server
   - **D**estroy(): löscht ein `Note` auf dem Server
+- [async.js](https://github.com/caolan/async): Flow-Library für asynchrone Operationen
+
+Eine kleine Erklärung zum Server:
+
+Der "Server" ist kein echter "Server", der über das Netzwerk erreicht wird. Es handelt sich hierbei, um einen Wrapper des [localStorage](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Storage#Summary) des Browsers. Um den `localStorage` zu bereinigen, kann man in der Konsole einfach die Methode ``localStorage.clear()`` ausführen. Alternativ kann man auch über das *Resources*-Tab der Konsole den `localStorage` löschen.
 
 ## Aufgaben
 
@@ -68,4 +73,83 @@ client.on('delete:success', function destroySuccessListener(id) {
 ```
 - Tipp 2: Die Argumente die den "Callbacks" bzw. "Listenern" übergeben werden kannst du je Methode im "Modul" Client.js nachlesen. Suche dabei nach dem Methodennamen, z.B. `Client.prototype.create` und nach dem Aufruf von `this.emit('xyz', arg1, arg2, argN)` bzw. `self.emit('abc', arg1, arg2, argN)`
 
-## main-1
+### main-1.js - Callbacks VS Promises (VS async.js)
+
+Als Nächstes geht es um den Vergleich von Promises und Callbacks. Wer möchte kann `async.js` in den Vergleich mitaufnehmen.
+
+- Erstelle zuerst neun `Notes` und verwende dabei sprechende Namen und Texte, damit du diese leicht wiedererkennen kannst. Zum Beispiel so:
+
+```javascript
+var note1 = new Note('Note 1');
+```
+
+- Speichere nun die ersten drei `Notes` **hintereinander** mit Hilfe des `Client`s auf dem "Server" ab. Verwende hierzu die *Callback*-API des `Client`s:
+
+```javascript
+client.create(note1, function callback(err, note) {
+	// note2
+		// note3
+})
+```
+
+- Stelle die `Note`s in einem `NotePad` dar nachdem alle drei abgepseichert wurden.
+- Speichere nun die `Note`s vier bis sechs **hintereinander** mit Hilfe der *Promise*-API:
+
+```javascript
+client
+	.create(note4)
+	.then(function () {
+	   // note5
+	})
+	// ... usw.
+```
+- Stelle die mit der *Promise*-API gepeicherten `Note`s im letzte Schritt im selben `NotePad` dar.
+
+- **Optional**
+- Speichere als letztes die `Notes`s sieben bis neun mit Hilfe `asnyc.js` ab.
+- Stelle im *finalen* Callback die `Note`s wiederim selben `NotePad` dar.
+- Tipp: 
+  - Fasse die `Notes` zuerst in einem Array zusammen: ```var notes = [note7, note8, note9] ```
+  - Verwende die Methode `async.each(arr, iterator, final)`
+  - Der `iterator`-Callback erhält als erstes Argument jeweils ein `Note`. Als zweites Argument erhält der `iterator` einen callback, der aufgerufen werden soll wenn die asynchrone Operation bzw. das Speichern auf dem "Server" fertig ist.
+  - Als drittes Argument erhält die `async.each` - Methode einen finalen Callback, der dazu dient einen Fehler zu behandeln bzw. eine finale Aktion auszuführen.
+
+```javascript
+async.each(
+	notes, 
+	function iterator(note, done) {
+		// note speichern und done() aufrufen wenn das Speichern abgeschlossen ist
+	},
+	function final(err) {
+	   // Fehler behandeln und wenn alles gut gegangen ist die Notes im NotePad anzeigen
+	}
+);	
+```
+
+### main-2.js Create, Read, Update and Delete
+
+Nun geht es darum den Workflow "Speichern", "Lesen", "Aktualisieren" und "Löschen" zu implementieren.
+Alle Methoden des `Client`s unterstützen sowohl die *Promise*- als aucch die *Callback*-API. Du kannst selbst entscheiden welche API dir besser gefällt.
+
+1. Erzeuge ein Neues `Note` mit einem eindeutigem Text.
+2. `Client.prototype.create`: Speichere das `Note` ab.
+3. `Client.prototype.read`: Lese das `Note` vom Server und zeige es im `NotePad` an.
+4. `Client.prototype.update`: Aktualisiere den Text des `Note`s auf dem "Server" und stelle das aktualisierte `Note` im `NotePad` dar.
+5. `Client.prototype.delete`: Lösche das `Note` auf dem "Server" und zeige den aktuellen Stand im `NotePad` an.
+
+Tipps: 
+- Kommentiere die Aufgabe main-1.js aus, damit du dich voll auf main.2.js konzentrieren kannst.
+- Gehe Schritt für Schritt vor und schaue dir an was das `NotePad` anzeigt.
+- Denke an das Bereinigen vom Server: `localStorage.clear()`.
+
+### main-pro.js Client + NotePad
+
+In dieser Aufgabe soll das NotePad mit dem Client kombiniert werden. Nun soll also bspw. ein neues `Note` auch auf dem "Server" gespeichert werden.
+
+1. Höre auf das *new*-Event und stelle diesmal nicht nur das neue `Note` im `NotePad` dar, sondern speichere es auch auf dem "Server".
+2. Höre auf das *delete*-Event eines `Note`s und lass es nicht nur aus dem `NotePad` verschwinden, sondern lösche es auch vom "Server".
+3. Lese inital alle `Note`s vom "Server" und zeige sie im `NotePad` an.
+4. Die aus 3. vom "Server" gelesenen `Note`s sollen auch gelöscht werden können
+
+Tipps: Siehe Aufgabe main-2.js 
+
