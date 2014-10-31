@@ -8,10 +8,10 @@
      * @constructor
      */
     function Server() {
-        if(!localStorage.getItem('notes')) {
+        if (!localStorage.getItem('notes')) {
             localStorage.setItem('notes', JSON.stringify({}));
         }
-        if(!localStorage.getItem('id')) {
+        if (!localStorage.getItem('id')) {
             localStorage.setItem('id', 4);
         }
     }
@@ -77,7 +77,7 @@
 
             if (isId) {
                 if (!notes[id]) {
-                    callback(new Error('(Storage Error) Can\t find note for id ' + id + ' .' ));
+                    callback(new Error('(Storage Error) Can\t find note for id ' + id + ' .'));
                     return;
                 }
 
@@ -147,7 +147,6 @@
     };
 
     server = new Server();
-
 
 
     /**
@@ -313,14 +312,14 @@
         var id = note.id;
 
         server.destroy(note.id, function (err) {
-           if (err) {
-               self.emit('destroy:error', err, id);
-               response.reject(err);
-               if (err) {
-                   callback(err);
-               }
-               return;
-           }
+            if (err) {
+                self.emit('destroy:error', err, id);
+                response.reject(err);
+                if (err) {
+                    callback(err);
+                }
+                return;
+            }
 
             delete note.id;
             self.emit('destroy:success', id);
@@ -334,7 +333,6 @@
 
         return response.promise;
     };
-
 
 
     /**

@@ -91,7 +91,8 @@
      * @param {Note} self
      * @TODO
      */
-    Note.prototype.onDelete = function (self) {};
+    Note.prototype.onDelete = function (self) {
+    };
 
     /**
      * @type {Note}
