@@ -109,7 +109,7 @@
      *
      * @param {number} id
      * @param {string} text
-     * @param {function(Error|null, Note?)} callback
+     * @param {function(Error|null)} callback
      */
     Server.prototype.update = function (id, text, callback) {
         setTimeout(function () {
@@ -124,7 +124,7 @@
 
             localStorage.setItem('notes', JSON.stringify(notes));
 
-            callback(null, notes);
+            callback(null);
         }, 75);
     }
 
@@ -283,7 +283,7 @@
         var response = Q.defer();
         var self = this;
 
-        server.update(note.id, note.text, function (err, note) {
+        server.update(note.id, note.text, function (err) {
             if (err) {
                 self.emit('update:error', err);
                 response.reject(err);
