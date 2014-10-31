@@ -107,7 +107,7 @@ client
 
 - **Optional**
 - Speichere als letztes die `Notes`s sieben bis neun mit Hilfe `asnyc.js` ab.
-- Stelle im *finalen* Callback die `Note`s wiederim selben `NotePad` dar.
+- Stelle im *finalen* Callback die `Note`s wiederum selben `NotePad` dar.
 - Tipp: 
   - Fasse die `Notes` zuerst in einem Array zusammen: ```var notes = [note7, note8, note9] ```
   - Verwende die Methode `async.each(arr, iterator, final)`
@@ -129,7 +129,7 @@ async.each(
 ### main-2.js Create, Read, Update and Delete
 
 Nun geht es darum den Workflow "Speichern", "Lesen", "Aktualisieren" und "Löschen" zu implementieren.
-Alle Methoden des `Client`s unterstützen sowohl die *Promise*- als aucch die *Callback*-API. Du kannst selbst entscheiden welche API dir besser gefällt.
+Alle Methoden des `Client`s unterstützen sowohl die *Promise*- als auch die *Callback*-API. Du kannst selbst entscheiden welche API dir besser gefällt.
 
 1. Erzeuge ein Neues `Note` mit einem eindeutigem Text.
 2. `Client.prototype.create`: Speichere das `Note` ab.
@@ -146,10 +146,10 @@ Tipps:
 
 In dieser Aufgabe soll das NotePad mit dem Client kombiniert werden. Nun soll also bspw. ein neues `Note` auch auf dem "Server" gespeichert werden.
 
-1. Höre auf das *new*-Event und stelle diesmal nicht nur das neue `Note` im `NotePad` dar, sondern speichere es auch auf dem "Server".
+1. Höre auf das *new*-Event der `Input`-Instanz und stelle diesmal nicht nur das neue `Note` im `NotePad` dar, sondern speichere es auch auf dem "Server".
 2. Höre auf das *delete*-Event eines `Note`s und lass es nicht nur aus dem `NotePad` verschwinden, sondern lösche es auch vom "Server".
 3. Lese inital alle `Note`s vom "Server" und zeige sie im `NotePad` an.
-4. Die aus 3. vom "Server" gelesenen `Note`s sollen auch gelöscht werden können
+4. Die aus 3. vom "Server" gelesenen `Note`s sollen auch gelöscht werden können.
 
 Tipps: Siehe Aufgabe main-2.js 
 
