@@ -9,11 +9,7 @@
      */
     function Server() {
         if(!localStorage.getItem('notes')) {
-            localStorage.setItem('notes', JSON.stringify({
-                "1": "Aufgabe 1",
-                "2": "Aufgabe 2",
-                "3": "Projektarbeit"
-            }));
+            localStorage.setItem('notes', JSON.stringify({}));
         }
         if(!localStorage.getItem('id')) {
             localStorage.setItem('id', 4);
