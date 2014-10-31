@@ -35,7 +35,7 @@ Als erstes soll ein einfaches Logging implementiert werden. Die Ausgabe erfolgt 
      - `Client.prototype.create`: `create:create`, `create:error`, `create:success`
      - `Client.prototype.read`: `read:read`, `read:error`, `read:success`
      - `Client.prototype.update`: `update:update`, `update:error`, `update:success`
-     - `Client.prototype.destroy`: `delete:delete`, `delete:error`, `delete:success`
+     - `Client.prototype.destroy`: `destroy:destroy`, `destroy:error`, `delete:success`
      - `Client.prototype.connect`: `connected`, `error`
 - Die Aufgabe besteht nun darin ein einfaches Logging in die Konsole des Browser zu implementieren.
   1. Erzeuge eine Instanz des `Client`s.
@@ -46,7 +46,7 @@ Als erstes soll ein einfaches Logging implementiert werden. Die Ausgabe erfolgt 
 - Tipp 1 - Auf diese Weisen kann man auf die "Ereignisse" hören:  
 
 ```javascript
-client.on('connect', function () {
+client.on('connected', function () {
 	console.log('Connection successfully established!')
 ;});
 
